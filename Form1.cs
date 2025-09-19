@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using System.Windows.Automation;
 
 namespace Automation
@@ -74,10 +76,25 @@ namespace Automation
 		// Helper to check for newline ending robustly
 		static bool endsWithWithNewline(string s) => s.EndsWith("\r\n") || s.EndsWith("\n");
 
+		// Import della funzione da user32.dll
+		[DllImport("user32.dll")]
+		private static extern bool SetForegroundWindow(IntPtr hWnd);
 		private void button2_Click(object sender, EventArgs e)
 		{
-			// Trova processo Notepad
-			Process[] procs = Process.GetProcessesByName("notepad");
+			var procs = Process.GetProcessesByName("notepad");
+			if (procs.Length == 0) throw new InvalidOperationException("Notepad non avviato.");
+
+			var hWnd = procs[0].MainWindowHandle;
+			SetForegroundWindow(hWnd);
+
+			SendKeys.SendWait("^{n}");
+
+
+		//NotepadZoomHelper.OpenZoomInOnNotepad();
+
+			/*
+		// Trova processo Notepad
+		Process[] procs = Process.GetProcessesByName("notepad");
 			if (procs.Length == 0) { Console.WriteLine("Notepad non avviato."); return; }
 
 			var hWnd = procs[0].MainWindowHandle;
@@ -128,6 +145,7 @@ namespace Automation
 				((InvokePattern)invObj).Invoke();
 				Console.WriteLine("Zoom + eseguito con successo.");
 			}
+			*/
 		}
-	}
+}
 }
